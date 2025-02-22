@@ -1,0 +1,9 @@
+Steps:
+- Before connection:
+    - Server must be running as a process
+    - server must have a special socket for initial contact from a client process on some arbitrary host (serversocket)
+- Create a TCP socket in the client program
+    - this socket specifies IP of server host and port num of socket
+- client initiates 3-way handshake -> takes place in transport layer
+- when server hears the doorknock -> creates a new socket for this client (connectionsocket)
+- 
