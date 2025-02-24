@@ -24,8 +24,7 @@ print("Server listening for connections...")
 connectionSocket, addr = serverSocket.accept()#connection socket for this specific client
 probecount=0
 while True:
-        ##send a ping back to client that message recieved,
-        message = connectionSocket.recv(1024).decode()
+        message = connectionSocket.recv(100000).decode()
         print("message: "+message)
         messagesplit = message.split("\n")
         args = messagesplit[0].split(" ")
@@ -48,7 +47,12 @@ while True:
                                 raise Exception
                         print("probe number "+str(probenum)+" recieved!\n")
                         time.sleep(serverDelay)
-                        connectionSocket.send(message.encode())
+                        totalBytesSent = 0
+                        while totalBytesSent < len(message):
+                                sent = connectionSocket.send(message[totalBytesSent:].encode())
+                                if sent == 0:
+                                        raise RuntimeError("socket connection broken")
+                                totalBytesSent+=sent
                 
                 except Exception as err:
                         print("404 ERROR: Invalid Measurement Message:"+err+"\n")

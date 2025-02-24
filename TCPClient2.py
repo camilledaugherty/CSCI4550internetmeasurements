@@ -70,26 +70,31 @@ allRTT = []
 allTPUT = []
 for i in range(numProbes):
         message = "m "
-        arbitrarytext = "a"
-        for byte in range(payload-1):
-                arbitrarytext+="a" #is there a more optimal way to do this?
+        arbitrarychar = "a"
+        arbitrarytext = arbitrarychar*payload
         message+=(arbitrarytext+" ")
         message+=(str(i+1)+"\n")
         try:
                 startTime = time.time()
-                clientSocket.send(message.encode())
-                time.sleep(0.005) #this is to make sure that messages are received separately
-                echo = clientSocket.recv(1024).decode()
+                totalBytesSent = 0
+                while totalBytesSent < len(message):
+                        sent = clientSocket.send(message[totalBytesSent:].encode())
+                        if sent == 0:
+                                raise RuntimeError("socket connection broken")
+                        totalBytesSent+=sent
+                echo = clientSocket.recv(100000).decode()
+                if len(echo)>20000: 
+                        time.sleep(0.1)
                 stopTime = time.time()
                 if echo!=message:
                         raise Exception
                 if measurement == "rtt":
                         rtt = stopTime-startTime
-                        print("rtt: "+str(rtt))
+                        print(str(rtt))
                         allRTT.append(rtt)
                 elif measurement == "tput":
                         tput = payload / (stopTime-startTime) #is this right???
-                        print("tput: "+str(tput))
+                        print(str(tput))
                         allTPUT.append(tput)
                 else:
                     raise Exception
